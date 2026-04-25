@@ -4,7 +4,7 @@ project(pnp_dual_fr3_moveit_config)
 find_package(ament_cmake REQUIRED)
 
 install(
-  DIRECTORY config
+  DIRECTORY config launch
   DESTINATION share/${PROJECT_NAME}
 )
 
