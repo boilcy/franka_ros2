@@ -207,7 +207,7 @@ def generate_launch_description():
         name='robot_state_publisher',
         namespace=namespace,
         output='both',
-        parameters=[robot_description],
+        parameters=[robot_description,{'publish_robot_description': True}],
     )
 
     ros2_controllers_path = os.path.join(
@@ -219,7 +219,7 @@ def generate_launch_description():
         package='controller_manager',
         executable='ros2_control_node',
         namespace=namespace,
-        parameters=[robot_description, ros2_controllers_path],
+        parameters=[ros2_controllers_path],
         remappings=[('joint_states', 'franka/joint_states')],
         output={
             'stdout': 'screen',

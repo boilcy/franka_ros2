@@ -6,6 +6,7 @@ services:
       args:
         - USER_UID=${USER_UID}
         - USER_GID=${USER_GID}
+        - USERNAME=ubuntu
     container_name: franka_ros2_jazzy
     network_mode: "host"
     privileged: true

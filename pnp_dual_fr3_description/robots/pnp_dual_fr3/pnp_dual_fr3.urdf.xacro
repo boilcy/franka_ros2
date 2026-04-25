@@ -1,0 +1,140 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="pnp_dual_fr3">
+
+  <xacro:include filename="$(find franka_description)/robots/common/franka_robot.xacro"/>
+
+  <xacro:arg name="robot_types" default="['fr3v2','fr3v2']"/>
+  <xacro:property name="robot_types_list" value="${$(arg robot_types)}"/>
+
+  <xacro:arg name="arm_prefixes" default="['left','right']"/>
+  <xacro:property name="arm_prefixes_list" value="${$(arg arm_prefixes)}"/>
+
+  <xacro:arg name="robot_ips" default="['172.16.0.2','172.16.0.3']"/>
+  <xacro:property name="robot_ips_list" value="${$(arg robot_ips)}"/>
+
+  <xacro:arg name="no_prefix" default="false"/>
+  <xacro:arg name="hand" default="false"/>
+  <xacro:arg name="ee_id" default="franka_hand"/>
+  <xacro:arg name="special_connection" default=""/>
+  <xacro:arg name="xyz_ee" default="0 0 0"/>
+  <xacro:arg name="rpy_ee" default="0 0 ${-pi/4}"/>
+  <xacro:arg name="tcp_xyz" default="0 0 0.1034"/>
+  <xacro:arg name="tcp_rpy" default="0 0 0"/>
+  <xacro:arg name="safety_distance" default="0.03"/>
+  <xacro:arg name="with_sc" default="false"/>
+  <xacro:arg name="ros2_control" default="false"/>
+  <xacro:arg name="use_fake_hardware" default="false"/>
+  <xacro:arg name="fake_sensor_commands" default="false"/>
+  <xacro:arg name="gazebo" default="false"/>
+  <xacro:arg name="gazebo_effort" default="false"/>
+  <xacro:arg name="description_pkg" default="franka_description"/>
+  <xacro:arg name="is_async" default="false"/>
+  <xacro:arg name="thread_priority" default="50"/>
+
+  <xacro:property name="left_robot_type" value="${robot_types_list[0]}"/>
+  <xacro:property name="right_robot_type" value="${robot_types_list[1]}"/>
+  <xacro:property name="left_arm_prefix" value="${arm_prefixes_list[0]}"/>
+  <xacro:property name="right_arm_prefix" value="${arm_prefixes_list[1]}"/>
+  <xacro:property name="left_prefix" value="${left_arm_prefix + '_' if left_arm_prefix else ''}"/>
+  <xacro:property name="right_prefix" value="${right_arm_prefix + '_' if right_arm_prefix else ''}"/>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://pnp_dual_fr3_description/meshes/base_link.STL"/>
+      </geometry>
+    </visual>
+    <visual>
+      <geometry>
+        <mesh filename="package://pnp_dual_fr3_description/meshes/adapter.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://pnp_dual_fr3_description/meshes/base_link.STL"/>
+      </geometry>
+    </collision>
+    <collision>
+      <geometry>
+        <mesh filename="package://pnp_dual_fr3_description/meshes/adapter.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.16881 6.9204e-06 -0.041149" rpy="0 0 0"/>
+      <mass value="126.89"/>
+      <inertia ixx="13.035" ixy="2.2312e-05" ixz="0.0074177" iyy="9.5179" iyz="-0.00013636" izz="16.483"/>
+    </inertial>
+  </link>
+
+  <!-- Mount transforms copied from dual_franka_linker_from_mjcf_curobo_fixed.urdf. -->
+  <joint name="base_link_to_${left_arm_prefix}_base" type="fixed">
+    <origin xyz="-0.038 0.118 0.65" rpy="1.57079265 0.786592654 3.14159265"/>
+    <parent link="base_link"/>
+    <child link="${left_arm_prefix}_base"/>
+  </joint>
+
+  <joint name="base_link_to_${right_arm_prefix}_base" type="fixed">
+    <origin xyz="-0.038 -0.118 0.65" rpy="-1.57079265 0.786592654 -3.14159265"/>
+    <parent link="base_link"/>
+    <child link="${right_arm_prefix}_base"/>
+  </joint>
+
+  <xacro:franka_robot
+    robot_type="${left_robot_type}"
+    joint_limits="${xacro.load_yaml('$(find franka_description)/robots/' + left_robot_type + '/joint_limits.yaml')}"
+    inertials="${xacro.load_yaml('$(find franka_description)/robots/' + left_robot_type + '/inertials.yaml')}"
+    kinematics="${xacro.load_yaml('$(find franka_description)/robots/' + left_robot_type + '/kinematics.yaml')}"
+    dynamics="${xacro.load_yaml('$(find franka_description)/robots/' + left_robot_type + '/dynamics.yaml')}"
+    accelerometer_config="${xacro.load_yaml('$(find franka_description)/robots/' + left_robot_type + '/accelerometers.yaml')}"
+    gazebo="$(arg gazebo)"
+    hand="$(arg hand)"
+    ee_id="$(arg ee_id)"
+    special_connection="$(arg special_connection)"
+    xyz_ee="$(arg xyz_ee)"
+    rpy_ee="$(arg rpy_ee)"
+    tcp_xyz="$(arg tcp_xyz)"
+    tcp_rpy="$(arg tcp_rpy)"
+    safety_distance="$(arg safety_distance)"
+    with_sc="$(arg with_sc)"
+    ros2_control="$(arg ros2_control)"
+    robot_ip="${robot_ips_list[0]}"
+    use_fake_hardware="$(arg use_fake_hardware)"
+    fake_sensor_commands="$(arg fake_sensor_commands)"
+    gazebo_effort="$(arg gazebo_effort)"
+    no_prefix="$(arg no_prefix)"
+    arm_prefix="${left_prefix}"
+    description_pkg="$(arg description_pkg)"
+    connected_to="${left_arm_prefix}_base"
+    is_async="$(arg is_async)"
+    thread_priority="$(arg thread_priority)"/>
+
+  <xacro:franka_robot
+    robot_type="${right_robot_type}"
+    joint_limits="${xacro.load_yaml('$(find franka_description)/robots/' + right_robot_type + '/joint_limits.yaml')}"
+    inertials="${xacro.load_yaml('$(find franka_description)/robots/' + right_robot_type + '/inertials.yaml')}"
+    kinematics="${xacro.load_yaml('$(find franka_description)/robots/' + right_robot_type + '/kinematics.yaml')}"
+    dynamics="${xacro.load_yaml('$(find franka_description)/robots/' + right_robot_type + '/dynamics.yaml')}"
+    accelerometer_config="${xacro.load_yaml('$(find franka_description)/robots/' + right_robot_type + '/accelerometers.yaml')}"
+    gazebo="$(arg gazebo)"
+    hand="$(arg hand)"
+    ee_id="$(arg ee_id)"
+    special_connection="$(arg special_connection)"
+    xyz_ee="$(arg xyz_ee)"
+    rpy_ee="$(arg rpy_ee)"
+    tcp_xyz="$(arg tcp_xyz)"
+    tcp_rpy="$(arg tcp_rpy)"
+    safety_distance="$(arg safety_distance)"
+    with_sc="$(arg with_sc)"
+    ros2_control="$(arg ros2_control)"
+    robot_ip="${robot_ips_list[1]}"
+    use_fake_hardware="$(arg use_fake_hardware)"
+    fake_sensor_commands="$(arg fake_sensor_commands)"
+    gazebo_effort="$(arg gazebo_effort)"
+    no_prefix="$(arg no_prefix)"
+    arm_prefix="${right_prefix}"
+    description_pkg="$(arg description_pkg)"
+    connected_to="${right_arm_prefix}_base"
+    is_async="$(arg is_async)"
+    thread_priority="$(arg thread_priority)"/>
+
+</robot>
