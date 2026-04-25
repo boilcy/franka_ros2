@@ -2,6 +2,7 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="pnp_dual_fr3">
 
   <xacro:include filename="$(find franka_description)/robots/common/franka_robot.xacro"/>
+  <xacro:include filename="$(find pnp_dual_fr3_description)/robots/pnp_dual_fr3/pnp_dual_fr3.ros2_control.xacro"/>
 
   <xacro:arg name="robot_types" default="['fr3v2','fr3v2']"/>
   <xacro:property name="robot_types_list" value="${$(arg robot_types)}"/>
@@ -31,6 +32,8 @@
   <xacro:arg name="is_async" default="false"/>
   <xacro:arg name="thread_priority" default="50"/>
 
+  <xacro:property name="home_positions" value="${xacro.load_yaml('$(find pnp_dual_fr3_description)/config/home_positions.yaml')}"/>
+
   <xacro:property name="left_robot_type" value="${robot_types_list[0]}"/>
   <xacro:property name="right_robot_type" value="${robot_types_list[1]}"/>
   <xacro:property name="left_arm_prefix" value="${arm_prefixes_list[0]}"/>
@@ -44,19 +47,9 @@
         <mesh filename="package://pnp_dual_fr3_description/meshes/base_link.STL"/>
       </geometry>
     </visual>
-    <visual>
-      <geometry>
-        <mesh filename="package://pnp_dual_fr3_description/meshes/adapter.stl" scale="0.001 0.001 0.001"/>
-      </geometry>
-    </visual>
     <collision>
       <geometry>
         <mesh filename="package://pnp_dual_fr3_description/meshes/base_link.STL"/>
-      </geometry>
-    </collision>
-    <collision>
-      <geometry>
-        <mesh filename="package://pnp_dual_fr3_description/meshes/adapter.stl" scale="0.001 0.001 0.001"/>
       </geometry>
     </collision>
     <inertial>
@@ -96,7 +89,7 @@
     tcp_rpy="$(arg tcp_rpy)"
     safety_distance="$(arg safety_distance)"
     with_sc="$(arg with_sc)"
-    ros2_control="$(arg ros2_control)"
+    ros2_control="false"
     robot_ip="${robot_ips_list[0]}"
     use_fake_hardware="$(arg use_fake_hardware)"
     fake_sensor_commands="$(arg fake_sensor_commands)"
@@ -125,7 +118,7 @@
     tcp_rpy="$(arg tcp_rpy)"
     safety_distance="$(arg safety_distance)"
     with_sc="$(arg with_sc)"
-    ros2_control="$(arg ros2_control)"
+    ros2_control="false"
     robot_ip="${robot_ips_list[1]}"
     use_fake_hardware="$(arg use_fake_hardware)"
     fake_sensor_commands="$(arg fake_sensor_commands)"
@@ -136,5 +129,33 @@
     connected_to="${right_arm_prefix}_base"
     is_async="$(arg is_async)"
     thread_priority="$(arg thread_priority)"/>
+
+  <xacro:if value="$(arg ros2_control)">
+    <xacro:pnp_franka_arm_ros2_control
+      robot_type="${left_robot_type}"
+      robot_ip="${robot_ips_list[0]}"
+      initial_positions="${home_positions.left}"
+      use_fake_hardware="$(arg use_fake_hardware)"
+      fake_sensor_commands="$(arg fake_sensor_commands)"
+      gazebo="$(arg gazebo)"
+      hand="$(arg hand)"
+      gazebo_effort="$(arg gazebo_effort)"
+      arm_prefix="${left_prefix}"
+      is_async="$(arg is_async)"
+      thread_priority="$(arg thread_priority)"/>
+
+    <xacro:pnp_franka_arm_ros2_control
+      robot_type="${right_robot_type}"
+      robot_ip="${robot_ips_list[1]}"
+      initial_positions="${home_positions.right}"
+      use_fake_hardware="$(arg use_fake_hardware)"
+      fake_sensor_commands="$(arg fake_sensor_commands)"
+      gazebo="$(arg gazebo)"
+      hand="$(arg hand)"
+      gazebo_effort="$(arg gazebo_effort)"
+      arm_prefix="${right_prefix}"
+      is_async="$(arg is_async)"
+      thread_priority="$(arg thread_priority)"/>
+  </xacro:if>
 
 </robot>

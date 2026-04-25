@@ -12,6 +12,8 @@
   <xacro:arg name="hand" default="false"/>
   <xacro:arg name="ee_id" default="franka_hand"/>
 
+  <xacro:property name="home_positions" value="${xacro.load_yaml('$(find pnp_dual_fr3_description)/config/home_positions.yaml')}"/>
+
   <xacro:property name="left_prefix" value="${arm_prefixes_list[0] + '_' if arm_prefixes_list[0] else ''}"/>
   <xacro:property name="right_prefix" value="${arm_prefixes_list[1] + '_' if arm_prefixes_list[1] else ''}"/>
   <xacro:property name="left_full_prefix" value="${left_prefix + robot_types_list[0] + '_'}"/>
@@ -101,6 +103,43 @@
     <joint name="${right_full_prefix}joint5" value="0"/>
     <joint name="${right_full_prefix}joint6" value="${pi/2}"/>
     <joint name="${right_full_prefix}joint7" value="${pi/4}"/>
+  </group_state>
+
+  <group_state name="home" group="left_arm">
+    <joint name="${left_full_prefix}joint1" value="${home_positions.left.joint1}"/>
+    <joint name="${left_full_prefix}joint2" value="${home_positions.left.joint2}"/>
+    <joint name="${left_full_prefix}joint3" value="${home_positions.left.joint3}"/>
+    <joint name="${left_full_prefix}joint4" value="${home_positions.left.joint4}"/>
+    <joint name="${left_full_prefix}joint5" value="${home_positions.left.joint5}"/>
+    <joint name="${left_full_prefix}joint6" value="${home_positions.left.joint6}"/>
+    <joint name="${left_full_prefix}joint7" value="${home_positions.left.joint7}"/>
+  </group_state>
+
+  <group_state name="home" group="right_arm">
+    <joint name="${right_full_prefix}joint1" value="${home_positions.right.joint1}"/>
+    <joint name="${right_full_prefix}joint2" value="${home_positions.right.joint2}"/>
+    <joint name="${right_full_prefix}joint3" value="${home_positions.right.joint3}"/>
+    <joint name="${right_full_prefix}joint4" value="${home_positions.right.joint4}"/>
+    <joint name="${right_full_prefix}joint5" value="${home_positions.right.joint5}"/>
+    <joint name="${right_full_prefix}joint6" value="${home_positions.right.joint6}"/>
+    <joint name="${right_full_prefix}joint7" value="${home_positions.right.joint7}"/>
+  </group_state>
+
+  <group_state name="home" group="both_arms">
+    <joint name="${left_full_prefix}joint1" value="${home_positions.left.joint1}"/>
+    <joint name="${left_full_prefix}joint2" value="${home_positions.left.joint2}"/>
+    <joint name="${left_full_prefix}joint3" value="${home_positions.left.joint3}"/>
+    <joint name="${left_full_prefix}joint4" value="${home_positions.left.joint4}"/>
+    <joint name="${left_full_prefix}joint5" value="${home_positions.left.joint5}"/>
+    <joint name="${left_full_prefix}joint6" value="${home_positions.left.joint6}"/>
+    <joint name="${left_full_prefix}joint7" value="${home_positions.left.joint7}"/>
+    <joint name="${right_full_prefix}joint1" value="${home_positions.right.joint1}"/>
+    <joint name="${right_full_prefix}joint2" value="${home_positions.right.joint2}"/>
+    <joint name="${right_full_prefix}joint3" value="${home_positions.right.joint3}"/>
+    <joint name="${right_full_prefix}joint4" value="${home_positions.right.joint4}"/>
+    <joint name="${right_full_prefix}joint5" value="${home_positions.right.joint5}"/>
+    <joint name="${right_full_prefix}joint6" value="${home_positions.right.joint6}"/>
+    <joint name="${right_full_prefix}joint7" value="${home_positions.right.joint7}"/>
   </group_state>
 
   <virtual_joint name="world_joint" type="fixed" parent_frame="world" child_link="base_link"/>
