@@ -41,6 +41,14 @@
   <xacro:property name="left_prefix" value="${left_arm_prefix + '_' if left_arm_prefix else ''}"/>
   <xacro:property name="right_prefix" value="${right_arm_prefix + '_' if right_arm_prefix else ''}"/>
 
+  <link name="pnp_root"/>
+
+  <joint name="pnp_root_to_base_link" type="fixed">
+    <parent link="pnp_root"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
   <link name="base_link">
     <visual>
       <geometry>

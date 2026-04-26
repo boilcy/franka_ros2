@@ -105,15 +105,19 @@ def generate_robot_nodes(context):
             'start_state_max_bounds_error': 0.1,
         }
     }
-    ompl_planning_pipeline_config['move_group'].update(
-        load_yaml('pnp_dual_fr3_moveit_config', 'config/ompl_planning.yaml')
+    ompl_planning_yaml = load_yaml(
+        'pnp_dual_fr3_moveit_config', 'config/ompl_planning.yaml'
     )
+    ompl_planning_pipeline_config['move_group'].update(ompl_planning_yaml)
 
+    # Trajectory Execution Functionality
+    moveit_simple_controllers_yaml = load_yaml(
+        'pnp_dual_fr3_moveit_config', 'config/pnp_dual_fr3_controllers.yaml'
+    )
     moveit_controllers = {
-        'moveit_simple_controller_manager': load_yaml(
-            'pnp_dual_fr3_moveit_config', 'config/pnp_dual_fr3_controllers.yaml'
-        ),
-        'moveit_controller_manager': 'moveit_simple_controller_manager/MoveItSimpleControllerManager',
+        'moveit_simple_controller_manager': moveit_simple_controllers_yaml,
+        'moveit_controller_manager': 'moveit_simple_controller_manager'
+                                     '/MoveItSimpleControllerManager',
     }
 
     trajectory_execution = {
@@ -128,6 +132,8 @@ def generate_robot_nodes(context):
         'publish_geometry_updates': True,
         'publish_state_updates': True,
         'publish_transforms_updates': True,
+        # 'publish_robot_description': True,
+        'publish_robot_description_semantic': True,
     }
 
     run_move_group_node = Node(
@@ -147,6 +153,11 @@ def generate_robot_nodes(context):
         ],
     )
 
+    # RViz
+    rviz_base = os.path.join(get_package_share_directory(
+        'franka_fr3_moveit_config'), 'rviz')
+    rviz_full_config = os.path.join(rviz_base, 'moveit.rviz')
+
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
@@ -154,9 +165,7 @@ def generate_robot_nodes(context):
         output='log',
         arguments=[
             '-d',
-            PathJoinSubstitution(
-                [FindPackageShare('franka_fr3_moveit_config'), 'rviz', 'moveit.rviz']
-            ),
+            rviz_full_config
         ],
         parameters=[
             robot_description,
@@ -185,7 +194,7 @@ def generate_robot_nodes(context):
         package='controller_manager',
         executable='ros2_control_node',
         namespace=namespace,
-        parameters=[ros2_controllers_path, robot_description],
+        parameters=[ros2_controllers_path],
         remappings=[('joint_states', 'franka/joint_states')],
         output={'stdout': 'screen', 'stderr': 'screen'},
         on_exit=Shutdown(),
