@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="linker_hand_l10">
+  <group name="hand">
+    <joint name="thumb_cmc_pitch"/>
+    <joint name="thumb_cmc_yaw"/>
+    <joint name="index_mcp_pitch"/>
+    <joint name="middle_mcp_pitch"/>
+    <joint name="ring_mcp_pitch"/>
+    <joint name="pinky_mcp_pitch"/>
+    <joint name="index_mcp_roll"/>
+    <joint name="ring_mcp_roll"/>
+    <joint name="pinky_mcp_roll"/>
+    <joint name="thumb_cmc_roll"/>
+  </group>
+</robot>

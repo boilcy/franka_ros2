@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="linker_hand_ros2_control"
+               params="hand_model:=l20
+                       use_fake_hardware:=false
+                        hand_side:=left
+                        can_interface:=can0
+                        can_baudrate:=1000000">
+    <ros2_control name="LinkerHandHardwareInterface" type="system">
+      <hardware>
+        <xacro:if value="${use_fake_hardware}">
+          <plugin>mock_components/GenericSystem</plugin>
+          <param name="state_following_offset">0.0</param>
+        </xacro:if>
+        <xacro:if value="${use_fake_hardware == 0}">
+          <plugin>linker_hand_hardware/LinkerHandHardwareInterface</plugin>
+          <param name="hand_model">${hand_model}</param>
+          <param name="hand_side">${hand_side}</param>
+          <param name="can_interface">${can_interface}</param>
+          <param name="can_baudrate">${can_baudrate}</param>
+          <param name="state_timeout_ms">1000</param>
+        </xacro:if>
+      </hardware>
+
+      <xacro:macro name="configure_joint" params="joint_name initial_position">
+        <joint name="${joint_name}">
+          <command_interface name="position"/>
+          <state_interface name="position">
+            <param name="initial_value">${initial_position}</param>
+          </state_interface>
+        </joint>
+      </xacro:macro>
+
+      <xacro:if value="${hand_model == 'l10'}">
+        <xacro:configure_joint joint_name="thumb_cmc_pitch" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="thumb_cmc_yaw" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="index_mcp_pitch" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="middle_mcp_pitch" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="ring_mcp_pitch" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="pinky_mcp_pitch" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="index_mcp_roll" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="ring_mcp_roll" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="pinky_mcp_roll" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="thumb_cmc_roll" initial_position="0.0"/>
+      </xacro:if>
+
+      <xacro:unless value="${hand_model == 'l10'}">
+        <xacro:configure_joint joint_name="thumb_cmc_pitch" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="index_mcp_pitch" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="middle_mcp_pitch" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="ring_mcp_pitch" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="pinky_mcp_pitch" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="thumb_cmc_yaw" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="index_mcp_roll" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="middle_mcp_roll" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="ring_mcp_roll" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="pinky_mcp_roll" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="thumb_cmc_roll" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="thumb_mcp" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="index_pip" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="middle_pip" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="ring_pip" initial_position="0.0"/>
+        <xacro:configure_joint joint_name="pinky_pip" initial_position="0.0"/>
+      </xacro:unless>
+
+      <xacro:if value="${hand_model == 'g20' and use_fake_hardware == 0}">
+        <sensor name="g20_tactile">
+          <state_interface name="normal_force_thumb"/>
+          <state_interface name="normal_force_index"/>
+          <state_interface name="normal_force_middle"/>
+          <state_interface name="normal_force_ring"/>
+          <state_interface name="normal_force_little"/>
+          <state_interface name="tangential_force_thumb"/>
+          <state_interface name="tangential_force_index"/>
+          <state_interface name="tangential_force_middle"/>
+          <state_interface name="tangential_force_ring"/>
+          <state_interface name="tangential_force_little"/>
+          <state_interface name="tangential_direction_thumb"/>
+          <state_interface name="tangential_direction_index"/>
+          <state_interface name="tangential_direction_middle"/>
+          <state_interface name="tangential_direction_ring"/>
+          <state_interface name="tangential_direction_little"/>
+          <state_interface name="approach_thumb"/>
+          <state_interface name="approach_index"/>
+          <state_interface name="approach_middle"/>
+          <state_interface name="approach_ring"/>
+          <state_interface name="approach_little"/>
+          <state_interface name="thumb_matrix_mass"/>
+          <state_interface name="index_matrix_mass"/>
+          <state_interface name="middle_matrix_mass"/>
+          <state_interface name="ring_matrix_mass"/>
+          <state_interface name="little_matrix_mass"/>
+        </sensor>
+      </xacro:if>
+    </ros2_control>
+  </xacro:macro>
+</robot>

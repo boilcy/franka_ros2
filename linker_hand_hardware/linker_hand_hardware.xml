@@ -1,0 +1,9 @@
+<library path="linker_hand_hardware">
+  <class name="linker_hand_hardware/LinkerHandHardwareInterface"
+         type="linker_hand_hardware::LinkerHandHardwareInterface"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>
+      ros2_control hardware interface that talks to Linker Hand directly over SocketCAN.
+    </description>
+  </class>
+</library>

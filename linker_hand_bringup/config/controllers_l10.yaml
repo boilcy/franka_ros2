@@ -1,0 +1,26 @@
+/**:
+  controller_manager:
+    ros__parameters:
+      update_rate: 100
+
+      joint_state_broadcaster:
+        type: joint_state_broadcaster/JointStateBroadcaster
+
+      hand_controller:
+        type: forward_command_controller/ForwardCommandController
+
+/**:
+  hand_controller:
+    ros__parameters:
+      joints:
+        - thumb_cmc_pitch
+        - thumb_cmc_yaw
+        - index_mcp_pitch
+        - middle_mcp_pitch
+        - ring_mcp_pitch
+        - pinky_mcp_pitch
+        - index_mcp_roll
+        - ring_mcp_roll
+        - pinky_mcp_roll
+        - thumb_cmc_roll
+      interface_name: position
