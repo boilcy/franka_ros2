@@ -31,6 +31,14 @@
   <xacro:arg name="description_pkg" default="franka_description"/>
   <xacro:arg name="is_async" default="false"/>
   <xacro:arg name="thread_priority" default="50"/>
+  <xacro:arg name="collision_behavior_lower_torque_thresholds_acceleration" default=""/>
+  <xacro:arg name="collision_behavior_upper_torque_thresholds_acceleration" default=""/>
+  <xacro:arg name="collision_behavior_lower_torque_thresholds_nominal" default=""/>
+  <xacro:arg name="collision_behavior_upper_torque_thresholds_nominal" default=""/>
+  <xacro:arg name="collision_behavior_lower_force_thresholds_acceleration" default=""/>
+  <xacro:arg name="collision_behavior_upper_force_thresholds_acceleration" default=""/>
+  <xacro:arg name="collision_behavior_lower_force_thresholds_nominal" default=""/>
+  <xacro:arg name="collision_behavior_upper_force_thresholds_nominal" default=""/>
 
   <xacro:property name="home_positions" value="${xacro.load_yaml('$(find pnp_dual_fr3_description)/config/home_positions.yaml')}"/>
 
@@ -150,7 +158,15 @@
       gazebo_effort="$(arg gazebo_effort)"
       arm_prefix="${left_prefix}"
       is_async="$(arg is_async)"
-      thread_priority="$(arg thread_priority)"/>
+      thread_priority="$(arg thread_priority)"
+      collision_behavior_lower_torque_thresholds_acceleration="$(arg collision_behavior_lower_torque_thresholds_acceleration)"
+      collision_behavior_upper_torque_thresholds_acceleration="$(arg collision_behavior_upper_torque_thresholds_acceleration)"
+      collision_behavior_lower_torque_thresholds_nominal="$(arg collision_behavior_lower_torque_thresholds_nominal)"
+      collision_behavior_upper_torque_thresholds_nominal="$(arg collision_behavior_upper_torque_thresholds_nominal)"
+      collision_behavior_lower_force_thresholds_acceleration="$(arg collision_behavior_lower_force_thresholds_acceleration)"
+      collision_behavior_upper_force_thresholds_acceleration="$(arg collision_behavior_upper_force_thresholds_acceleration)"
+      collision_behavior_lower_force_thresholds_nominal="$(arg collision_behavior_lower_force_thresholds_nominal)"
+      collision_behavior_upper_force_thresholds_nominal="$(arg collision_behavior_upper_force_thresholds_nominal)"/>
 
     <xacro:pnp_franka_arm_ros2_control
       robot_type="${right_robot_type}"
@@ -163,7 +179,15 @@
       gazebo_effort="$(arg gazebo_effort)"
       arm_prefix="${right_prefix}"
       is_async="$(arg is_async)"
-      thread_priority="$(arg thread_priority)"/>
+      thread_priority="$(arg thread_priority)"
+      collision_behavior_lower_torque_thresholds_acceleration="$(arg collision_behavior_lower_torque_thresholds_acceleration)"
+      collision_behavior_upper_torque_thresholds_acceleration="$(arg collision_behavior_upper_torque_thresholds_acceleration)"
+      collision_behavior_lower_torque_thresholds_nominal="$(arg collision_behavior_lower_torque_thresholds_nominal)"
+      collision_behavior_upper_torque_thresholds_nominal="$(arg collision_behavior_upper_torque_thresholds_nominal)"
+      collision_behavior_lower_force_thresholds_acceleration="$(arg collision_behavior_lower_force_thresholds_acceleration)"
+      collision_behavior_upper_force_thresholds_acceleration="$(arg collision_behavior_upper_force_thresholds_acceleration)"
+      collision_behavior_lower_force_thresholds_nominal="$(arg collision_behavior_lower_force_thresholds_nominal)"
+      collision_behavior_upper_force_thresholds_nominal="$(arg collision_behavior_upper_force_thresholds_nominal)"/>
   </xacro:if>
 
 </robot>

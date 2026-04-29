@@ -29,6 +29,43 @@ def generate_robot_nodes(context):
     joint_state_rate = int(LaunchConfiguration('joint_state_rate').perform(context))
     thread_priority = LaunchConfiguration('thread_priority').perform(context)
     use_rviz = LaunchConfiguration('use_rviz').perform(context).lower() == 'true'
+    configure_collision_behavior = LaunchConfiguration(
+        'configure_collision_behavior'
+    ).perform(context).lower() == 'true'
+    collision_behavior_lower_torque_thresholds_acceleration = LaunchConfiguration(
+        'collision_behavior_lower_torque_thresholds_acceleration'
+    ).perform(context)
+    collision_behavior_upper_torque_thresholds_acceleration = LaunchConfiguration(
+        'collision_behavior_upper_torque_thresholds_acceleration'
+    ).perform(context)
+    collision_behavior_lower_torque_thresholds_nominal = LaunchConfiguration(
+        'collision_behavior_lower_torque_thresholds_nominal'
+    ).perform(context)
+    collision_behavior_upper_torque_thresholds_nominal = LaunchConfiguration(
+        'collision_behavior_upper_torque_thresholds_nominal'
+    ).perform(context)
+    collision_behavior_lower_force_thresholds_acceleration = LaunchConfiguration(
+        'collision_behavior_lower_force_thresholds_acceleration'
+    ).perform(context)
+    collision_behavior_upper_force_thresholds_acceleration = LaunchConfiguration(
+        'collision_behavior_upper_force_thresholds_acceleration'
+    ).perform(context)
+    collision_behavior_lower_force_thresholds_nominal = LaunchConfiguration(
+        'collision_behavior_lower_force_thresholds_nominal'
+    ).perform(context)
+    collision_behavior_upper_force_thresholds_nominal = LaunchConfiguration(
+        'collision_behavior_upper_force_thresholds_nominal'
+    ).perform(context)
+
+    if not configure_collision_behavior:
+        collision_behavior_lower_torque_thresholds_acceleration = ''
+        collision_behavior_upper_torque_thresholds_acceleration = ''
+        collision_behavior_lower_torque_thresholds_nominal = ''
+        collision_behavior_upper_torque_thresholds_nominal = ''
+        collision_behavior_lower_force_thresholds_acceleration = ''
+        collision_behavior_upper_force_thresholds_acceleration = ''
+        collision_behavior_lower_force_thresholds_nominal = ''
+        collision_behavior_upper_force_thresholds_nominal = ''
 
     pnp_urdf_xacro_file = PathJoinSubstitution(
         [
@@ -52,6 +89,30 @@ def generate_robot_nodes(context):
                 'ros2_control': 'true',
                 'is_async': 'true',
                 'thread_priority': thread_priority,
+                'collision_behavior_lower_torque_thresholds_acceleration': (
+                    collision_behavior_lower_torque_thresholds_acceleration
+                ),
+                'collision_behavior_upper_torque_thresholds_acceleration': (
+                    collision_behavior_upper_torque_thresholds_acceleration
+                ),
+                'collision_behavior_lower_torque_thresholds_nominal': (
+                    collision_behavior_lower_torque_thresholds_nominal
+                ),
+                'collision_behavior_upper_torque_thresholds_nominal': (
+                    collision_behavior_upper_torque_thresholds_nominal
+                ),
+                'collision_behavior_lower_force_thresholds_acceleration': (
+                    collision_behavior_lower_force_thresholds_acceleration
+                ),
+                'collision_behavior_upper_force_thresholds_acceleration': (
+                    collision_behavior_upper_force_thresholds_acceleration
+                ),
+                'collision_behavior_lower_force_thresholds_nominal': (
+                    collision_behavior_lower_force_thresholds_nominal
+                ),
+                'collision_behavior_upper_force_thresholds_nominal': (
+                    collision_behavior_upper_force_thresholds_nominal
+                ),
             },
         ).toprettyxml(indent='  ')
     }
@@ -288,6 +349,54 @@ def generate_launch_description():
                 'use_rviz',
                 default_value='true',
                 description='Launch RViz.',
+            ),
+            DeclareLaunchArgument(
+                'configure_collision_behavior',
+                default_value='false',
+                description=(
+                    'Apply collision/reflex thresholds to each Franka hardware '
+                    'interface during startup.'
+                ),
+            ),
+            DeclareLaunchArgument(
+                'collision_behavior_lower_torque_thresholds_acceleration',
+                default_value='25.0 25.0 22.0 20.0 19.0 17.0 14.0',
+                description='Lower joint torque contact thresholds during acceleration.',
+            ),
+            DeclareLaunchArgument(
+                'collision_behavior_upper_torque_thresholds_acceleration',
+                default_value='35.0 35.0 32.0 30.0 29.0 27.0 24.0',
+                description='Upper joint torque collision thresholds during acceleration.',
+            ),
+            DeclareLaunchArgument(
+                'collision_behavior_lower_torque_thresholds_nominal',
+                default_value='25.0 25.0 22.0 20.0 19.0 17.0 14.0',
+                description='Lower joint torque contact thresholds during nominal motion.',
+            ),
+            DeclareLaunchArgument(
+                'collision_behavior_upper_torque_thresholds_nominal',
+                default_value='35.0 35.0 32.0 30.0 29.0 27.0 24.0',
+                description='Upper joint torque collision thresholds during nominal motion.',
+            ),
+            DeclareLaunchArgument(
+                'collision_behavior_lower_force_thresholds_acceleration',
+                default_value='30.0 30.0 30.0 25.0 25.0 25.0',
+                description='Lower Cartesian force contact thresholds during acceleration.',
+            ),
+            DeclareLaunchArgument(
+                'collision_behavior_upper_force_thresholds_acceleration',
+                default_value='40.0 40.0 40.0 35.0 35.0 35.0',
+                description='Upper Cartesian force collision thresholds during acceleration.',
+            ),
+            DeclareLaunchArgument(
+                'collision_behavior_lower_force_thresholds_nominal',
+                default_value='30.0 30.0 30.0 25.0 25.0 25.0',
+                description='Lower Cartesian force contact thresholds during nominal motion.',
+            ),
+            DeclareLaunchArgument(
+                'collision_behavior_upper_force_thresholds_nominal',
+                default_value='40.0 40.0 40.0 35.0 35.0 35.0',
+                description='Upper Cartesian force collision thresholds during nominal motion.',
             ),
             OpaqueFunction(function=generate_robot_nodes),
         ]

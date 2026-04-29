@@ -103,6 +103,25 @@ auto FrankaHardwareInterfaceTest::get_param_service_response(
   response = *result.get();
 }
 
+void setFullCollisionBehaviorHardwareParameters(hardware_interface::HardwareInfo& hardware_info) {
+  hardware_info.hardware_parameters["collision_behavior.lower_torque_thresholds_acceleration"] =
+      "1.0 2.0 3.0 4.0 5.0 6.0 7.0";
+  hardware_info.hardware_parameters["collision_behavior.upper_torque_thresholds_acceleration"] =
+      "8.0 9.0 10.0 11.0 12.0 13.0 14.0";
+  hardware_info.hardware_parameters["collision_behavior.lower_torque_thresholds_nominal"] =
+      "15.0 16.0 17.0 18.0 19.0 20.0 21.0";
+  hardware_info.hardware_parameters["collision_behavior.upper_torque_thresholds_nominal"] =
+      "22.0 23.0 24.0 25.0 26.0 27.0 28.0";
+  hardware_info.hardware_parameters["collision_behavior.lower_force_thresholds_acceleration"] =
+      "29.0 30.0 31.0 32.0 33.0 34.0";
+  hardware_info.hardware_parameters["collision_behavior.upper_force_thresholds_acceleration"] =
+      "35.0 36.0 37.0 38.0 39.0 40.0";
+  hardware_info.hardware_parameters["collision_behavior.lower_force_thresholds_nominal"] =
+      "41.0 42.0 43.0 44.0 45.0 46.0";
+  hardware_info.hardware_parameters["collision_behavior.upper_force_thresholds_nominal"] =
+      "47.0 48.0 49.0 50.0 51.0 52.0";
+}
+
 TEST_F(FrankaHardwareInterfaceTest, givenUnsupportedURDFVersion_thenReturnError) {
   auto urdf_string =
       readFileToString(TEST_CASE_DIRECTORY + robot_type + "_unsupported_version.urdf");
@@ -129,6 +148,78 @@ TEST_F(FrankaHardwareInterfaceTest, givenFR3ComponentInfo_whenOnInitCalled_expec
 
   ASSERT_EQ(return_type,
             rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS);
+}
+
+TEST_F(FrankaHardwareInterfaceTest,
+       givenFullCollisionBehaviorHardwareParameters_whenOnInitCalled_expectCollisionBehaviorSet) {
+  auto urdf_string = readFileToString(TEST_CASE_DIRECTORY + robot_type + ".urdf");
+  auto parsed_hardware_infos = hardware_interface::parse_control_resources_from_urdf(urdf_string);
+  auto hardware_info = parsed_hardware_infos[0];
+
+  setFullCollisionBehaviorHardwareParameters(hardware_info);
+
+  auto mock_robot = std::make_shared<MockRobot>();
+  franka_hardware::FrankaHardwareInterface franka_hardware_interface{mock_robot, robot_type};
+
+  EXPECT_CALL(*mock_robot, setFullCollisionBehavior(testing::_))
+      .Times(1)
+      .WillOnce(testing::Invoke(
+          [](const franka_msgs::srv::SetFullCollisionBehavior::Request::SharedPtr& request) {
+            EXPECT_THAT(request->lower_torque_thresholds_acceleration,
+                        testing::ElementsAre(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0));
+            EXPECT_THAT(request->upper_torque_thresholds_acceleration,
+                        testing::ElementsAre(8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0));
+            EXPECT_THAT(request->lower_torque_thresholds_nominal,
+                        testing::ElementsAre(15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0));
+            EXPECT_THAT(request->upper_torque_thresholds_nominal,
+                        testing::ElementsAre(22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0));
+            EXPECT_THAT(request->lower_force_thresholds_acceleration,
+                        testing::ElementsAre(29.0, 30.0, 31.0, 32.0, 33.0, 34.0));
+            EXPECT_THAT(request->upper_force_thresholds_acceleration,
+                        testing::ElementsAre(35.0, 36.0, 37.0, 38.0, 39.0, 40.0));
+            EXPECT_THAT(request->lower_force_thresholds_nominal,
+                        testing::ElementsAre(41.0, 42.0, 43.0, 44.0, 45.0, 46.0));
+            EXPECT_THAT(request->upper_force_thresholds_nominal,
+                        testing::ElementsAre(47.0, 48.0, 49.0, 50.0, 51.0, 52.0));
+          }));
+
+  ASSERT_EQ(franka_hardware_interface.on_init(hardware_info),
+            rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::SUCCESS);
+}
+
+TEST_F(FrankaHardwareInterfaceTest,
+       givenIncompleteCollisionBehaviorHardwareParameters_whenOnInitCalled_expectError) {
+  auto urdf_string = readFileToString(TEST_CASE_DIRECTORY + robot_type + ".urdf");
+  auto parsed_hardware_infos = hardware_interface::parse_control_resources_from_urdf(urdf_string);
+  auto hardware_info = parsed_hardware_infos[0];
+  hardware_info.hardware_parameters["collision_behavior.lower_torque_thresholds_acceleration"] =
+      "1.0 2.0 3.0 4.0 5.0 6.0 7.0";
+
+  auto mock_robot = std::make_shared<MockRobot>();
+  franka_hardware::FrankaHardwareInterface franka_hardware_interface{mock_robot, robot_type};
+
+  EXPECT_CALL(*mock_robot, setFullCollisionBehavior(testing::_)).Times(0);
+
+  ASSERT_EQ(franka_hardware_interface.on_init(hardware_info),
+            rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR);
+}
+
+TEST_F(FrankaHardwareInterfaceTest,
+       givenMalformedCollisionBehaviorHardwareParameters_whenOnInitCalled_expectError) {
+  auto urdf_string = readFileToString(TEST_CASE_DIRECTORY + robot_type + ".urdf");
+  auto parsed_hardware_infos = hardware_interface::parse_control_resources_from_urdf(urdf_string);
+  auto hardware_info = parsed_hardware_infos[0];
+  setFullCollisionBehaviorHardwareParameters(hardware_info);
+  hardware_info.hardware_parameters["collision_behavior.upper_force_thresholds_nominal"] =
+      "47.0 48.0 bad 50.0 51.0 52.0";
+
+  auto mock_robot = std::make_shared<MockRobot>();
+  franka_hardware::FrankaHardwareInterface franka_hardware_interface{mock_robot, robot_type};
+
+  EXPECT_CALL(*mock_robot, setFullCollisionBehavior(testing::_)).Times(0);
+
+  ASSERT_EQ(franka_hardware_interface.on_init(hardware_info),
+            rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn::ERROR);
 }
 
 TEST_F(FrankaHardwareInterfaceTest, givenFR3CommandInterfaces_thenNumberIsSetupCorrectly) {

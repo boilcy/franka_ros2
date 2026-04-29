@@ -13,7 +13,15 @@
             gazebo_effort:=false
             arm_prefix:=''
             is_async:=false
-            thread_priority:=50">
+            thread_priority:=50
+            collision_behavior_lower_torque_thresholds_acceleration:=''
+            collision_behavior_upper_torque_thresholds_acceleration:=''
+            collision_behavior_lower_torque_thresholds_nominal:=''
+            collision_behavior_upper_torque_thresholds_nominal:=''
+            collision_behavior_lower_force_thresholds_acceleration:=''
+            collision_behavior_upper_force_thresholds_acceleration:=''
+            collision_behavior_lower_force_thresholds_nominal:=''
+            collision_behavior_upper_force_thresholds_nominal:=''">
 
     <xacro:property name="use_fake_hardware_enabled" value="${use_fake_hardware == True or use_fake_hardware == 'true' or use_fake_hardware == 1}"/>
     <xacro:property name="gazebo_enabled" value="${gazebo == True or gazebo == 'true' or gazebo == 1}"/>
@@ -44,6 +52,16 @@
           <plugin>franka_hardware/FrankaHardwareInterface</plugin>
           <param name="robot_ip">${robot_ip}</param>
           <param name="arm_prefix">${arm_prefix}</param>
+          <xacro:if value="${collision_behavior_lower_torque_thresholds_acceleration != ''}">
+            <param name="collision_behavior.lower_torque_thresholds_acceleration">${collision_behavior_lower_torque_thresholds_acceleration}</param>
+            <param name="collision_behavior.upper_torque_thresholds_acceleration">${collision_behavior_upper_torque_thresholds_acceleration}</param>
+            <param name="collision_behavior.lower_torque_thresholds_nominal">${collision_behavior_lower_torque_thresholds_nominal}</param>
+            <param name="collision_behavior.upper_torque_thresholds_nominal">${collision_behavior_upper_torque_thresholds_nominal}</param>
+            <param name="collision_behavior.lower_force_thresholds_acceleration">${collision_behavior_lower_force_thresholds_acceleration}</param>
+            <param name="collision_behavior.upper_force_thresholds_acceleration">${collision_behavior_upper_force_thresholds_acceleration}</param>
+            <param name="collision_behavior.lower_force_thresholds_nominal">${collision_behavior_lower_force_thresholds_nominal}</param>
+            <param name="collision_behavior.upper_force_thresholds_nominal">${collision_behavior_upper_force_thresholds_nominal}</param>
+          </xacro:if>
         </xacro:if>
       </hardware>
 

@@ -14,8 +14,11 @@
 
 #include <fmt/core.h>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <exception>
+#include <sstream>
+#include <stdexcept>
 
 #include <franka/exception.h>
 #include <franka/logging/logger.hpp>
@@ -33,6 +36,15 @@
 const std::string kVersionName = "version";
 const std::string kRobotIpName = "robot_ip";
 const std::string kArmIdName = "robot_type";
+const std::array<std::string, 8> kFullCollisionBehaviorParameterNames = {
+    "collision_behavior.lower_torque_thresholds_acceleration",
+    "collision_behavior.upper_torque_thresholds_acceleration",
+    "collision_behavior.lower_torque_thresholds_nominal",
+    "collision_behavior.upper_torque_thresholds_nominal",
+    "collision_behavior.lower_force_thresholds_acceleration",
+    "collision_behavior.upper_force_thresholds_acceleration",
+    "collision_behavior.lower_force_thresholds_nominal",
+    "collision_behavior.upper_force_thresholds_nominal"};
 
 namespace {
 
@@ -52,6 +64,35 @@ auto parseVersion(const std::string& version_str) {
 
   return std::make_tuple(std::stoi(version_parts[0]), std::stoi(version_parts[1]),
                          std::stoi(version_parts[2]));
+}
+
+template <size_t Size>
+std::array<double, Size> parseDoubleArrayParameter(const std::string& parameter_name,
+                                                   std::string parameter_value) {
+  std::replace(parameter_value.begin(), parameter_value.end(), '[', ' ');
+  std::replace(parameter_value.begin(), parameter_value.end(), ']', ' ');
+  std::replace(parameter_value.begin(), parameter_value.end(), ',', ' ');
+
+  std::array<double, Size> values{};
+  std::stringstream stream(parameter_value);
+  for (auto& value : values) {
+    if (!(stream >> value)) {
+      throw std::invalid_argument(fmt::format(
+          "Parameter '{}' must contain exactly {} floating point values.", parameter_name, Size));
+    }
+    if (!std::isfinite(value)) {
+      throw std::invalid_argument(
+          fmt::format("Parameter '{}' must contain only finite values.", parameter_name));
+    }
+  }
+
+  double extra_value = 0.0;
+  if (stream >> extra_value) {
+    throw std::invalid_argument(fmt::format(
+        "Parameter '{}' must contain exactly {} floating point values.", parameter_name, Size));
+  }
+
+  return values;
 }
 
 }  // namespace
@@ -329,6 +370,61 @@ CallbackReturn FrankaHardwareInterface::on_init(const hardware_interface::Hardwa
       return CallbackReturn::ERROR;
     }
     RCLCPP_INFO(getLogger(), "Successfully connected to robot");
+  }
+
+  const auto has_collision_behavior_parameter = std::any_of(
+      kFullCollisionBehaviorParameterNames.cbegin(), kFullCollisionBehaviorParameterNames.cend(),
+      [this](const auto& parameter_name) {
+        return info_.hardware_parameters.find(parameter_name) != info_.hardware_parameters.end();
+      });
+  if (has_collision_behavior_parameter) {
+    const auto all_collision_behavior_parameters_present = std::all_of(
+        kFullCollisionBehaviorParameterNames.cbegin(), kFullCollisionBehaviorParameterNames.cend(),
+        [this](const auto& parameter_name) {
+          return info_.hardware_parameters.find(parameter_name) != info_.hardware_parameters.end();
+        });
+    if (!all_collision_behavior_parameters_present) {
+      RCLCPP_FATAL(
+          getLogger(),
+          "Incomplete collision behavior configuration. Set all eight collision_behavior.* "
+          "hardware parameters or remove them all.");
+      return CallbackReturn::ERROR;
+    }
+
+    try {
+      auto request = std::make_shared<franka_msgs::srv::SetFullCollisionBehavior::Request>();
+      request->lower_torque_thresholds_acceleration = parseDoubleArrayParameter<7>(
+          kFullCollisionBehaviorParameterNames[0],
+          info_.hardware_parameters.at(kFullCollisionBehaviorParameterNames[0]));
+      request->upper_torque_thresholds_acceleration = parseDoubleArrayParameter<7>(
+          kFullCollisionBehaviorParameterNames[1],
+          info_.hardware_parameters.at(kFullCollisionBehaviorParameterNames[1]));
+      request->lower_torque_thresholds_nominal = parseDoubleArrayParameter<7>(
+          kFullCollisionBehaviorParameterNames[2],
+          info_.hardware_parameters.at(kFullCollisionBehaviorParameterNames[2]));
+      request->upper_torque_thresholds_nominal = parseDoubleArrayParameter<7>(
+          kFullCollisionBehaviorParameterNames[3],
+          info_.hardware_parameters.at(kFullCollisionBehaviorParameterNames[3]));
+      request->lower_force_thresholds_acceleration = parseDoubleArrayParameter<6>(
+          kFullCollisionBehaviorParameterNames[4],
+          info_.hardware_parameters.at(kFullCollisionBehaviorParameterNames[4]));
+      request->upper_force_thresholds_acceleration = parseDoubleArrayParameter<6>(
+          kFullCollisionBehaviorParameterNames[5],
+          info_.hardware_parameters.at(kFullCollisionBehaviorParameterNames[5]));
+      request->lower_force_thresholds_nominal = parseDoubleArrayParameter<6>(
+          kFullCollisionBehaviorParameterNames[6],
+          info_.hardware_parameters.at(kFullCollisionBehaviorParameterNames[6]));
+      request->upper_force_thresholds_nominal = parseDoubleArrayParameter<6>(
+          kFullCollisionBehaviorParameterNames[7],
+          info_.hardware_parameters.at(kFullCollisionBehaviorParameterNames[7]));
+
+      robot_->setFullCollisionBehavior(request);
+      RCLCPP_INFO(getLogger(), "Configured full collision behavior for prefix '%s'.",
+                  prefix_.c_str());
+    } catch (const std::exception& ex) {
+      RCLCPP_FATAL(getLogger(), "Failed to configure collision behavior: %s", ex.what());
+      return CallbackReturn::ERROR;
+    }
   }
 
   service_node_ = std::make_shared<FrankaParamServiceServer>(rclcpp::NodeOptions(), robot_);
