@@ -1,0 +1,11 @@
+PNP_DUAL_FR3:
+  robot_types: "['fr3','fr3']"
+  arm_prefixes: "['left','right']"
+  robot_ips: "['172.16.16.11','172.16.16.12']"
+  load_gripper: "false"
+  use_fake_hardware: "true"
+  fake_sensor_commands: "true"
+  joint_state_rate: 1000
+  namespace: ""
+  use_rviz: "true"
+  thread_priority: 50
