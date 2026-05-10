@@ -90,11 +90,6 @@
 
   <xacro:franka_robot
     robot_type="${left_robot_type}"
-    joint_limits="${xacro.load_yaml('$(find franka_description)/robots/' + left_robot_type + '/joint_limits.yaml')}"
-    inertials="${xacro.load_yaml('$(find franka_description)/robots/' + left_robot_type + '/inertials.yaml')}"
-    kinematics="${xacro.load_yaml('$(find franka_description)/robots/' + left_robot_type + '/kinematics.yaml')}"
-    dynamics="${xacro.load_yaml('$(find franka_description)/robots/' + left_robot_type + '/dynamics.yaml')}"
-    accelerometer_config="${xacro.load_yaml('$(find franka_description)/robots/' + left_robot_type + '/accelerometers.yaml')}"
     gazebo="$(arg gazebo)"
     hand="$(arg hand)"
     ee_id="$(arg ee_id)"
@@ -119,11 +114,6 @@
 
   <xacro:franka_robot
     robot_type="${right_robot_type}"
-    joint_limits="${xacro.load_yaml('$(find franka_description)/robots/' + right_robot_type + '/joint_limits.yaml')}"
-    inertials="${xacro.load_yaml('$(find franka_description)/robots/' + right_robot_type + '/inertials.yaml')}"
-    kinematics="${xacro.load_yaml('$(find franka_description)/robots/' + right_robot_type + '/kinematics.yaml')}"
-    dynamics="${xacro.load_yaml('$(find franka_description)/robots/' + right_robot_type + '/dynamics.yaml')}"
-    accelerometer_config="${xacro.load_yaml('$(find franka_description)/robots/' + right_robot_type + '/accelerometers.yaml')}"
     gazebo="$(arg gazebo)"
     hand="$(arg hand)"
     ee_id="$(arg ee_id)"
