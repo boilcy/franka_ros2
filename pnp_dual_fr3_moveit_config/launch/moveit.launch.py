@@ -1,3 +1,4 @@
+# pyright: reportMissingImports=false, reportUnknownVariableType=false, reportAttributeAccessIssue=false, reportUnknownParameterType=false, reportMissingParameterType=false, reportAny=false, reportUnknownArgumentType=false, reportOptionalMemberAccess=false, reportUnknownMemberType=false, reportImplicitStringConcatenation=false
 import os
 
 from ament_index_python.packages import get_package_share_directory
@@ -28,6 +29,7 @@ def generate_robot_nodes(context):
     load_gripper = LaunchConfiguration('load_gripper').perform(context)
     joint_state_rate = int(LaunchConfiguration('joint_state_rate').perform(context))
     thread_priority = LaunchConfiguration('thread_priority').perform(context)
+    ros2_controllers_file = LaunchConfiguration('ros2_controllers_file').perform(context)
     use_rviz = LaunchConfiguration('use_rviz').perform(context).lower() == 'true'
     configure_collision_behavior = (
         LaunchConfiguration('configure_collision_behavior').perform(context).lower() == 'true'
@@ -239,11 +241,21 @@ def generate_robot_nodes(context):
         parameters=[robot_description, {'publish_robot_description': True}],
     )
 
-    ros2_controllers_path = os.path.join(
-        get_package_share_directory('pnp_dual_fr3_moveit_config'),
-        'config',
-        'pnp_dual_fr3_ros_controllers.yaml',
-    )
+    if not ros2_controllers_file:
+        ros2_controllers_file = (
+            'pnp_dual_fr3_velocity_ros_controllers.yaml'
+            if use_fake_hardware.lower() == 'true'
+            else 'pnp_dual_fr3_ros_controllers.yaml'
+        )
+
+    if os.path.isabs(ros2_controllers_file):
+        ros2_controllers_path = ros2_controllers_file
+    else:
+        ros2_controllers_path = os.path.join(
+            get_package_share_directory('pnp_dual_fr3_moveit_config'),
+            'config',
+            ros2_controllers_file,
+        )
 
     ros2_control_node = Node(
         package='controller_manager',
@@ -327,6 +339,14 @@ def generate_launch_description():
                 'fake_sensor_commands',
                 default_value='true',
                 description='Use fake sensor commands.',
+            ),
+            DeclareLaunchArgument(
+                'ros2_controllers_file',
+                default_value='',
+                description=(
+                    'ros2_control controller YAML from the config directory, or an absolute path. '
+                    'Empty means auto: position+velocity controller for fake hardware, effort controller otherwise.'
+                ),
             ),
             DeclareLaunchArgument(
                 'namespace',
