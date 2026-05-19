@@ -1,4 +1,4 @@
-# pyright: reportMissingImports=false, reportUnknownVariableType=false, reportAttributeAccessIssue=false, reportUnknownParameterType=false, reportMissingParameterType=false, reportAny=false, reportUnknownArgumentType=false, reportOptionalMemberAccess=false, reportUnknownMemberType=false, reportImplicitStringConcatenation=false
+# pyright: reportMissingImports=false, reportMissingTypeStubs=false, reportUnknownVariableType=false, reportAttributeAccessIssue=false, reportUnknownParameterType=false, reportMissingParameterType=false, reportAny=false, reportUnknownArgumentType=false, reportOptionalMemberAccess=false, reportUnknownMemberType=false, reportImplicitStringConcatenation=false
 import os
 
 from ament_index_python.packages import get_package_share_directory
@@ -278,6 +278,10 @@ def generate_robot_nodes(context):
                     'spawner',
                     controller,
                     '--controller-manager-timeout',
+                    '60',
+                    '--service-call-timeout',
+                    '60',
+                    '--switch-timeout',
                     '60',
                     '--controller-manager',
                     PathJoinSubstitution([namespace, 'controller_manager']),

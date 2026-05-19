@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="linker_hand_l20">
+  <xacro:arg name="ros2_control" default="false"/>
+  <xacro:arg name="use_fake_hardware" default="false"/>
+  <xacro:arg name="hand_side" default="left"/>
+  <xacro:arg name="can_interface" default="can0"/>
+  <xacro:arg name="can_baudrate" default="1000000"/>
+
+  <xacro:include filename="$(find linker_hand_description)/robots/common/linker_hand.ros2_control.xacro"/>
+  <xacro:include filename="$(find linker_hand_description)/robots/l20/l20_left.urdf.xacro"/>
+  <xacro:include filename="$(find linker_hand_description)/robots/l20/l20_right.urdf.xacro"/>
+
+  <xacro:property name="hand_side_value" value="$(arg hand_side)"/>
+
+  <xacro:if value="${hand_side_value == 'left'}">
+    <xacro:linker_hand_l20_left_robot/>
+  </xacro:if>
+  <xacro:if value="${hand_side_value == 'right'}">
+    <xacro:linker_hand_l20_right_robot/>
+  </xacro:if>
+
+  <xacro:if value="$(arg ros2_control)">
+    <xacro:linker_hand_ros2_control
+      hand_model="l20"
+      use_fake_hardware="$(arg use_fake_hardware)"
+      hand_side="$(arg hand_side)"
+      can_interface="$(arg can_interface)"
+      can_baudrate="$(arg can_baudrate)"/>
+  </xacro:if>
+</robot>
