@@ -21,7 +21,7 @@ import xacro
 package_share = get_package_share_directory('pnp_dual_fr3_bringup')
 
 
-def generate_robot_nodes(context):
+def generate_joint_state_nodes(context):
     robot_config_file = LaunchConfiguration('robot_config_file').perform(context)
 
     if not os.path.isabs(robot_config_file) and os.path.sep not in robot_config_file:
@@ -43,7 +43,6 @@ def generate_robot_nodes(context):
     load_gripper_str = str(config.get('load_gripper', 'false'))
     namespace = str(config.get('namespace', ''))
     joint_state_rate = int(config.get('joint_state_rate', 30))
-    use_rviz = str(config.get('use_rviz', 'true')).lower() == 'true'
     thread_priority_str = str(config.get('thread_priority', 50))
 
     controllers_yaml = LaunchConfiguration('controllers_yaml').perform(context)
@@ -78,7 +77,7 @@ def generate_robot_nodes(context):
         },
     ).toprettyxml(indent='  ')
 
-    nodes = [
+    return [
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
@@ -110,6 +109,7 @@ def generate_robot_nodes(context):
             name='joint_state_publisher',
             namespace=namespace,
             parameters=[{'source_list': ['franka/joint_states'], 'rate': joint_state_rate}],
+            output='screen',
         ),
         Node(
             package='controller_manager',
@@ -119,29 +119,6 @@ def generate_robot_nodes(context):
             output='screen',
         ),
     ]
-
-    if use_rviz:
-        nodes.append(
-            Node(
-                package='rviz2',
-                executable='rviz2',
-                name='rviz2',
-                arguments=[
-                    '--display-config',
-                    PathJoinSubstitution(
-                        [
-                            FindPackageShare('pnp_dual_fr3_description'),
-                            'rviz',
-                            'visualize_pnp_dual_fr3.rviz',
-                        ]
-                    ),
-                ],
-                output='screen',
-                parameters=[{'robot_description': robot_description}],
-            )
-        )
-
-    return nodes
 
 
 def generate_launch_description():
@@ -165,6 +142,6 @@ def generate_launch_description():
                 ),
                 description='ROS 2 control controller configuration file.',
             ),
-            OpaqueFunction(function=generate_robot_nodes),
+            OpaqueFunction(function=generate_joint_state_nodes),
         ]
     )
