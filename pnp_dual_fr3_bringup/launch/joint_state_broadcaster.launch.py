@@ -21,6 +21,14 @@ import xacro
 package_share = get_package_share_directory('pnp_dual_fr3_bringup')
 
 
+def launch_arg_or_config(context, config, name, default):
+    value = LaunchConfiguration(name).perform(context)
+    if value != '':
+        return value
+
+    return str(config.get(name, default))
+
+
 def generate_joint_state_nodes(context):
     robot_config_file = LaunchConfiguration('robot_config_file').perform(context)
 
@@ -35,15 +43,15 @@ def generate_joint_state_nodes(context):
             f'Configuration file {robot_config_file} does not contain a valid duo setup.'
         )
 
-    robot_ips_str = str(config['robot_ips'])
-    robot_types_str = str(config['robot_types'])
-    arm_prefixes_str = str(config['arm_prefixes'])
-    use_fake_hardware_str = str(config.get('use_fake_hardware', 'true'))
-    fake_sensor_commands_str = str(config.get('fake_sensor_commands', 'true'))
-    load_gripper_str = str(config.get('load_gripper', 'false'))
-    namespace = str(config.get('namespace', ''))
-    joint_state_rate = int(config.get('joint_state_rate', 30))
-    thread_priority_str = str(config.get('thread_priority', 50))
+    robot_ips_str = launch_arg_or_config(context, config, 'robot_ips', config['robot_ips'])
+    robot_types_str = launch_arg_or_config(context, config, 'robot_types', config['robot_types'])
+    arm_prefixes_str = launch_arg_or_config(context, config, 'arm_prefixes', config['arm_prefixes'])
+    use_fake_hardware_str = launch_arg_or_config(context, config, 'use_fake_hardware', 'false')
+    fake_sensor_commands_str = launch_arg_or_config(context, config, 'fake_sensor_commands', 'true')
+    load_gripper_str = launch_arg_or_config(context, config, 'load_gripper', 'false')
+    namespace = launch_arg_or_config(context, config, 'namespace', '')
+    joint_state_rate = int(launch_arg_or_config(context, config, 'joint_state_rate', 30))
+    thread_priority_str = launch_arg_or_config(context, config, 'thread_priority', 50)
 
     controllers_yaml = LaunchConfiguration('controllers_yaml').perform(context)
     robot_types_list = parse_string_list(robot_types_str)
@@ -141,6 +149,56 @@ def generate_launch_description():
                     ]
                 ),
                 description='ROS 2 control controller configuration file.',
+            ),
+            DeclareLaunchArgument(
+                'robot_types',
+                default_value='',
+                description='Override robot_types from the YAML config, e.g. "[\'fr3v2\',\'fr3v2\']".',
+            ),
+            DeclareLaunchArgument(
+                'robot_ips',
+                default_value='',
+                description='Override robot_ips from the YAML config.',
+            ),
+            DeclareLaunchArgument(
+                'arm_prefixes',
+                default_value='',
+                description='Override arm_prefixes from the YAML config, e.g. "[\'left\',\'right\']".',
+            ),
+            DeclareLaunchArgument(
+                'use_fake_hardware',
+                default_value='',
+                description='Override use_fake_hardware from the YAML config.',
+            ),
+            DeclareLaunchArgument(
+                'fake_sensor_commands',
+                default_value='',
+                description='Override fake_sensor_commands from the YAML config.',
+            ),
+            DeclareLaunchArgument(
+                'load_gripper',
+                default_value='',
+                description='Override load_gripper from the YAML config.',
+            ),
+            DeclareLaunchArgument(
+                'namespace',
+                default_value='',
+                description='Override namespace from the YAML config.',
+            ),
+            DeclareLaunchArgument(
+                'joint_state_rate',
+                default_value='',
+                description='Override joint_state_rate from the YAML config.',
+            ),
+            DeclareLaunchArgument(
+                'thread_priority',
+                default_value='',
+                description='Override thread_priority from the YAML config.',
+            ),
+            DeclareLaunchArgument(
+                'use_rviz',
+                default_value='',
+                description='Accepted for command-line compatibility; this launch never starts RViz.',
             ),
             OpaqueFunction(function=generate_joint_state_nodes),
         ]
