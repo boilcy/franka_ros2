@@ -54,18 +54,19 @@
   <xacro:property name="use_dual_arm_45_mounting" value="${'$(arg mounting_type)' == 'dual_arm_45'}"/>
   <xacro:property name="mounting_base_link" value="${'dual_arm_45_base_link' if use_dual_arm_45_mounting else 'base_link'}"/>
   <xacro:property name="mounting_base_mesh" value="${'dual_arm_45_base_link.STL' if use_dual_arm_45_mounting else 'base_link.STL'}"/>
+  <xacro:property name="mounting_base_origin_rpy" value="${'0 0 0' if use_dual_arm_45_mounting else '0 0 0'}"/>
   <xacro:property name="mounting_base_visual_rpy" value="${'-1.5708000001 -0.0000000001 -3.1415853072' if use_dual_arm_45_mounting else '0 0 0'}"/>
-  <xacro:property name="left_mount_xyz" value="${'-0.038 0.18 0.304' if use_dual_arm_45_mounting else '-0.038 0.118 0.65'}"/>
-  <xacro:property name="left_mount_rpy" value="${'0.5567600306 0.5689773370 2.4626595739' if use_dual_arm_45_mounting else '1.57079265 2.35619449 3.14159265'}"/>
-  <xacro:property name="right_mount_xyz" value="${'-0.038 -0.18 0.304' if use_dual_arm_45_mounting else '-0.038 -0.118 0.65'}"/>
-  <xacro:property name="right_mount_rpy" value="${'-0.5567600306 0.5689773370 -2.4626595739' if use_dual_arm_45_mounting else '-1.57079265 2.35619449 -3.14159265'}"/>
+  <xacro:property name="left_mount_xyz" value="${'-0.038 -0.18 0.304' if use_dual_arm_45_mounting else '-0.038 0.118 0.65'}"/>
+  <xacro:property name="left_mount_rpy" value="${'-0.5567600306 0.5689773370 -2.4626595739' if use_dual_arm_45_mounting else '1.57079265 2.35619449 3.14159265'}"/>
+  <xacro:property name="right_mount_xyz" value="${'-0.038 0.18 0.304' if use_dual_arm_45_mounting else '-0.038 -0.118 0.65'}"/>
+  <xacro:property name="right_mount_rpy" value="${'0.5567600306 0.5689773370 2.4626595739' if use_dual_arm_45_mounting else '-1.57079265 2.35619449 -3.14159265'}"/>
 
   <link name="pnp_root"/>
 
   <joint name="pnp_root_to_${mounting_base_link}" type="fixed">
     <parent link="pnp_root"/>
     <child link="${mounting_base_link}"/>
-    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <origin xyz="0 0 0" rpy="${mounting_base_origin_rpy}"/>
   </joint>
 
   <link name="${mounting_base_link}">
