@@ -23,6 +23,8 @@ def generate_robot_nodes(context):
     robot_types = LaunchConfiguration('robot_types').perform(context)
     robot_ips = LaunchConfiguration('robot_ips').perform(context)
     arm_prefixes = LaunchConfiguration('arm_prefixes').perform(context)
+    mounting_type = LaunchConfiguration('mounting_type').perform(context)
+    home_pose_type = LaunchConfiguration('home_pose_type').perform(context)
     use_fake_hardware = LaunchConfiguration('use_fake_hardware').perform(context)
     fake_sensor_commands = LaunchConfiguration('fake_sensor_commands').perform(context)
     namespace = LaunchConfiguration('namespace').perform(context)
@@ -85,6 +87,8 @@ def generate_robot_nodes(context):
                 'robot_types': robot_types,
                 'robot_ips': robot_ips,
                 'arm_prefixes': arm_prefixes,
+                'mounting_type': mounting_type,
+                'home_pose_type': home_pose_type,
                 'hand': load_gripper,
                 'use_fake_hardware': use_fake_hardware,
                 'fake_sensor_commands': fake_sensor_commands,
@@ -134,6 +138,8 @@ def generate_robot_nodes(context):
             mappings={
                 'robot_types': robot_types,
                 'arm_prefixes': arm_prefixes,
+                'mounting_type': mounting_type,
+                'home_pose_type': home_pose_type,
                 'hand': load_gripper,
             },
         ).toprettyxml(indent='  ')
@@ -261,7 +267,7 @@ def generate_robot_nodes(context):
         package='controller_manager',
         executable='ros2_control_node',
         namespace=namespace,
-        parameters=[ros2_controllers_path],
+        parameters=[robot_description, ros2_controllers_path],
         remappings=[('joint_states', 'franka/joint_states')],
         output={'stdout': 'screen', 'stderr': 'screen'},
         on_exit=Shutdown(),
@@ -328,6 +334,16 @@ def generate_launch_description():
                 'arm_prefixes',
                 default_value="['left','right']",
                 description='Arm prefixes as a string list.',
+            ),
+            DeclareLaunchArgument(
+                'mounting_type',
+                default_value='dual_arm_45',
+                description='Mounting base variant: dual_arm_45 or legacy.',
+            ),
+            DeclareLaunchArgument(
+                'home_pose_type',
+                default_value='dual_arm_45',
+                description='Home pose variant: dual_arm_45 or legacy.',
             ),
             DeclareLaunchArgument(
                 'load_gripper',
