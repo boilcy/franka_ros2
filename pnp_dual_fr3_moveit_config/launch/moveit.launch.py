@@ -221,7 +221,7 @@ def generate_robot_nodes(context):
     )
 
     # RViz
-    rviz_base = os.path.join(get_package_share_directory('franka_fr3_moveit_config'), 'rviz')
+    rviz_base = os.path.join(get_package_share_directory('pnp_dual_fr3_moveit_config'), 'rviz')
     rviz_full_config = os.path.join(rviz_base, 'moveit.rviz')
 
     rviz_node = Node(

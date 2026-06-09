@@ -4,7 +4,7 @@ project(pnp_dual_fr3_moveit_config)
 find_package(ament_cmake REQUIRED)
 
 install(
-  DIRECTORY config launch
+  DIRECTORY config launch rviz
   DESTINATION share/${PROJECT_NAME}
 )
 
